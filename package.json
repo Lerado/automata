@@ -1,0 +1,16 @@
+{
+  "name": "automatons",
+  "version": "1.0.0",
+  "description": "Basic automata algorithms for CS304",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "automata",
+    "CS304",
+    "algorithms"
+  ],
+  "author": "Lerado",
+  "license": "ISC"
+}
