@@ -132,10 +132,24 @@ class Automaton {
 
     /**
      * Normalizes automaton
-     * @param {Automaton} automaton 
+     * 
+     * @mutators
+     * @returns {Automaton} this
      */
-    static normalize(automaton) {
+    _normalize() {
+        // We can start by sorting state per order, but this can become complex
 
+        // Map each state to the index that is going to replace
+        this.states = this.states.map((state, index) => (index));
+        this.initialState = this.states.findIndex(state => arrayEquals(this.initialState, state));
+        this.finalStates = this.finalStates.map(finalState => (this.states.findIndex(state => arrayEquals(state, finalState))));
+        this.transitions = this.transitions.map(transition => ({
+            from: this.states.findIndex(state => arrayEquals(state, transition.from)),
+            to: this.states.findIndex(state => arrayEquals(state, transition.to)),
+            symbol: transition.symbol
+        }));
+
+        return this;
     }
 
     /**
@@ -535,6 +549,40 @@ class Automaton {
 
             // console.log({ newClasses, classes });
         }
+
+        // We then have equivalence classes, now we must compute the minimal automaton
+        let transitions = [];
+        let initialState = []
+        let finalStates = [];
+        classes.forEach($class => {
+            // Check if initial state
+            if ($class.some(state => state === this.initialState))
+                initialState = $class;
+
+            // Check if final state
+            if ($class.some(state => this.finalStates.includes(state)))
+                finalStates.push($class);
+            
+            // Then look for possible transitions
+            classes.forEach($class_ => {
+                this.alphabet.forEach(symbol => {
+                    if ($class.some(state => $class_.includes(this.transition(state, symbol))))
+                        transitions.push({
+                            from: $class,
+                            to: $class_,
+                            symbol: symbol
+                        });
+                });
+            });
+        });
+
+        let result = new Automaton(this.alphabet);
+        result.states = classes;
+        result.initialState = initialState;
+        result.finalStates = finalStates;
+        result.transitions = transitions;
+
+        return result;
     }
 };
 
